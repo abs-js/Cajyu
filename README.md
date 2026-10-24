@@ -2,57 +2,74 @@
 
 **A clean, practical programming language that transpiles to JavaScript.**
 
-Cajyu is designed for people who want a simpler syntax without leaving the JavaScript ecosystem. Write expressive code, get real JavaScript output, and use a growing set of official libraries.
+Cajyu gives you a simpler, more expressive syntax while staying fully compatible with the JavaScript ecosystem.
 
 [![npm](https://img.shields.io/badge/npm-cajyu-blue)](https://www.npmjs.com/package/cajyu)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](package.json)
 
 ---
 
 ## Features
 
-- **Familiar yet cleaner syntax** — variables, functions, classes, control flow, and loops that feel natural
-- **Transpiles to modern JavaScript** — runs anywhere Node.js runs
-- **Real HTTP server** — built-in `Server` class with POST handlers, sleep/wake, and static files
-- **Official libraries** — `serial`, `fs`, `math`, `http` (and more coming)
-- **Optional typing** — runtime type checks with `var x:Number = 10`
-- **Async support** — `sync fn` and `wait`
-- **One-liners & stacking** — concise style when you want it
-- **CLI** — `cajyu init`, `cajyu inst`, `cajyu run`
+- Clean syntax for variables, functions, classes, loops and conditionals
+- Transpiles to modern JavaScript
+- Real HTTP server with POST handlers, sleep/wake
+- Official libraries: `serial`, `fs`, `math`, `http`, `websocket`
+- Optional runtime typing
+- Async with `sync fn` and `wait`
+- One-liners and stacking
+- CLI with flags and multiple commands
 
 ---
 
 ## Quick Start
 
 ```bash
-# Install the CLI (once published)
+# After publishing
 npm install -g cajyu
 
-# Or run directly from this repo
+# Or from source
 node bin/cajyu.js --help
 ```
 
-Create a new project:
-
 ```bash
 cajyu init
-```
-
-Run a file:
-
-```bash
+cajyu inst serial
+cajyu inst http
 cajyu run examples/fatorial.cjy
 ```
 
 ---
 
-## Syntax Overview
+## CLI
+
+```
+cajyu [flags]
+cajyu <command> [options]
+```
+
+| Command          | Description                          |
+|------------------|--------------------------------------|
+| `init`           | Create a new project                 |
+| `inst <lib>`     | Install a library from CajyuLibs     |
+| `run <file.cjy>` | Compile and run a file               |
+| `list`           | List installed libraries             |
+| `update`         | Update libraries (planned)           |
+
+| Flag             | Description          |
+|------------------|----------------------|
+| `-h, --help`     | Show help            |
+| `-v, --version`  | Show version         |
+
+---
+
+## Syntax
 
 ### Variables
 ```cajyu
 var name = "Cajyu"
 var age:Number = 17
-var items = [1, 2, 3]
 ```
 
 ### Functions
@@ -60,13 +77,9 @@ var items = [1, 2, 3]
 fn add a, b {
   return a + b
 }
-
-fn double x {
-  return x * 2
-}
 ```
 
-### Control Flow
+### Control flow & loops
 ```cajyu
 if x > 10 {
   print("big")
@@ -75,16 +88,9 @@ if x > 10 {
 } else {
   print("small")
 }
-```
 
-### Loops
-```cajyu
 for i in range(10) {
   print(i)
-}
-
-while x < 100 {
-  x = x * 2
 }
 ```
 
@@ -96,26 +102,14 @@ class Person {
     Self.age = age
   }
   greet {
-    return "Hello, I'm " + Self.name
+    return "Hello, " + Self.name
   }
 }
-
-var p = new Person("Ana", 17)
-print(p.greet())
 ```
 
-### Async
-```cajyu
-sync fn fetchData {
-  wait someAsyncCall()
-  return result
-}
-```
-
-### HTTP Server
+### HTTP
 ```cajyu
 import Server from CajyuLibs.http
-import print from CajyuLibs.serial
 
 var server = new Server(3000)
 
@@ -123,10 +117,20 @@ server.post(fn b {
   if !b.a and !b.b {
     return { code: 400 }
   }
-  return {
-    code: 200,
-    result: b.a + b.b
-  }
+  return { code: 200, result: b.a + b.b }
+})
+```
+
+### WebSocket
+```cajyu
+import WS from CajyuLibs.websocket
+
+var wss = new WS.Server(8080)
+wss.on("connection", fn client {
+  print("client connected")
+})
+wss.on("message", fn msg, client {
+  wss.broadcast(msg)
 })
 ```
 
@@ -134,56 +138,25 @@ server.post(fn b {
 
 ## Libraries
 
-Official libraries live in the [CajyuLibs](https://github.com/abs-js/CajyuLibs) repository.
-
-Install a library:
+Official libraries: https://github.com/abs-js/CajyuLibs
 
 ```bash
 cajyu inst serial
+cajyu inst fs
+cajyu inst math
 cajyu inst http
-```
-
-Import in your code:
-
-```cajyu
-import print from CajyuLibs.serial
-import Server from CajyuLibs.http
-```
-
----
-
-## CLI Commands
-
-| Command | Description |
-|---------|-------------|
-| `cajyu init` | Create a new project (`package.json` + structure) |
-| `cajyu inst <name>` | Install a library from CajyuLibs |
-| `cajyu run <file.cjy>` | Compile and run a Cajyu file |
-
----
-
-## Project Structure
-
-```
-Cajyu/
-├── bin/cajyu.js          # CLI entry point
-├── src/compiler.js       # Transpiler
-├── examples/             # Working examples
-│   ├── fatorial.cjy
-│   ├── classe.cjy
-│   └── servidor-post.cjy
-└── package.json
+cajyu inst websocket
 ```
 
 ---
 
 ## Contributing
 
-Cajyu is early but intentional. Pull requests are welcome — especially for:
+Pull requests are welcome. Priority areas:
 
-- A proper parser (currently regex-based)
+- A proper parser (current one is regex-based)
 - More language features
-- New official libraries
+- Additional libraries
 - Better error messages
 
 ---
@@ -191,7 +164,3 @@ Cajyu is early but intentional. Pull requests are welcome — especially for:
 ## License
 
 MIT
-
----
-
-**Built for people who like clean code and real results.**
