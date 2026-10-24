@@ -2,10 +2,13 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 import { compileAndRun } from '../src/compiler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const CAJYULIBS_REPO = 'https://github.com/abs-js/CajyuLibs.git';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -19,7 +22,7 @@ async function main() {
       console.error('Usage: cajyu inst <library>');
       process.exit(1);
     }
-    installLib(libName);
+    await installLib(libName);
   } else if (command === 'run') {
     const file = args[1];
     if (!file) {
@@ -29,7 +32,7 @@ async function main() {
     await compileAndRun(file);
   } else {
     console.log(`
-Cajyu - A custom programming language
+Cajyu — a custom programming language
 
 Usage:
   cajyu init          Create a new project
@@ -48,12 +51,39 @@ function initProject() {
     type: "module"
   };
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+  if (!fs.existsSync('CajyuLibs')) fs.mkdirSync('CajyuLibs');
   console.log('Cajyu project initialized.');
 }
 
-function installLib(libName) {
-  console.log(`Installing library "${libName}" from CajyuLibs...`);
-  console.log('(In a full release this would clone from https://github.com/abs-js/CajyuLibs)');
+async function installLib(libName) {
+  console.log(`Installing "${libName}" from CajyuLibs...`);
+
+  const targetDir = path.join(process.cwd(), 'CajyuLibs', libName);
+  if (fs.existsSync(targetDir)) {
+    console.log(`Library "${libName}" already installed. Skipping.`);
+    return;
+  }
+
+  const tmpDir = path.join('/tmp', `cajyulibs-${Date.now()}`);
+  try {
+    console.log('Cloning CajyuLibs repository...');
+    execSync(`git clone --depth 1 ${CAJYULIBS_REPO} ${tmpDir}`, { stdio: 'inherit' });
+
+    const sourceLib = path.join(tmpDir, libName);
+    if (!fs.existsSync(sourceLib)) {
+      console.error(`Library "${libName}" not found in CajyuLibs repository.`);
+      process.exit(1);
+    }
+
+    fs.mkdirSync(path.dirname(targetDir), { recursive: true });
+    fs.cpSync(sourceLib, targetDir, { recursive: true });
+    console.log(`Library "${libName}" installed to CajyuLibs/${libName}/`);
+  } catch (err) {
+    console.error('Failed to install library:', err.message);
+    process.exit(1);
+  } finally {
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+  }
 }
 
 main().catch(console.error);
