@@ -1,0 +1,16 @@
+import WS from CajyuLibs.websocket
+import print from CajyuLibs.serial
+
+var wss = new WS.Server(3002)
+print("Cajyu live chat WebSocket on port 3002")
+
+wss.on("connection", fn client {
+  print("Client connected")
+})
+
+wss.on("message", fn msg, client {
+  print("Message: " + msg)
+  wss.broadcast(msg)
+})
+
+print("Open a WebSocket client to ws://localhost:3002 to chat")
