@@ -1,0 +1,17 @@
+{
+  "name": "cajyu",
+  "version": "1.0.0",
+  "description": "Cajyu programming language - a custom language that compiles to JavaScript",
+  "main": "src/compiler.js",
+  "bin": {
+    "cajyu": "./bin/cajyu.js"
+  },
+  "scripts": {
+    "start": "node bin/cajyu.js"
+  },
+  "keywords": ["cajyu", "compiler", "language", "javascript"],
+  "author": "Cajyu Team",
+  "license": "MIT",
+  "dependencies": {},
+  "type": "module"
+}
