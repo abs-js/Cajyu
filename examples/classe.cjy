@@ -1,0 +1,16 @@
+import print from CajyuLibs.serial
+
+class Pessoa {
+  Main nome, idade {
+    Self.nome = nome
+    Self.idade = idade
+  }
+  // private nome
+  // private idade
+  apresentar {
+    return "Oi, eu sou " + Self.nome + " e tenho " + Self.idade + " anos"
+  }
+}
+
+var p = new Pessoa("Ana", 17)
+print(p.apresentar())
