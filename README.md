@@ -15,7 +15,8 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 - Clean syntax for variables, functions, classes, loops and conditionals
 - Transpiles to modern JavaScript
 - Real HTTP server with POST handlers, sleep/wake
-- Official libraries: `serial`, `fs`, `math`, `http`, `websocket`
+- WebSocket that automatically sends and receives JSON
+- Official libraries: `serial`, `fs`, `math`, `http`, `websocket`, `string`, `json`, `exec`, `fetch`
 - Optional runtime typing
 - Async with `sync fn` and `wait`
 - One-liners and stacking
@@ -121,16 +122,24 @@ server.post(fn b {
 })
 ```
 
-### WebSocket
+### WebSocket (JSON)
 ```cajyu
 import WS from CajyuLibs.websocket
 
 var wss = new WS.Server(8080)
-wss.on("connection", fn client {
-  print("client connected")
-})
 wss.on("message", fn msg, client {
-  wss.broadcast(msg)
+  wss.broadcast({ echo: msg })
+})
+```
+
+### Exec & Fetch
+```cajyu
+import exec from CajyuLibs.exec
+var files = exec.exec("ls -a")
+
+import fetch from CajyuLibs.fetch
+fetch.fetch("https://api.github.com", {}, null, fn result, ms {
+  print(result)
 })
 ```
 
@@ -146,6 +155,10 @@ cajyu inst fs
 cajyu inst math
 cajyu inst http
 cajyu inst websocket
+cajyu inst string
+cajyu inst json
+cajyu inst exec
+cajyu inst fetch
 ```
 
 ---
