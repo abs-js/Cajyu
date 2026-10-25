@@ -41,9 +41,9 @@ const BUILTIN_LIBS = new Set(['exec']);
 function builtinLibCode(name) {
   switch (name) {
     case 'Bexec': return `
-import { execSync } from 'child_process'; export const CayjuLib = { exec: (command) => { try { return execSync(command, { encoding: 'utf-8' }).trim(); } catch (e) { throw new Error('Exec failed: ' + e.message);}}};
+import { execSync } from 'child_process'; export const CajyuLib = { exec: (command) => { try { return execSync(command, { encoding: 'utf-8' }).trim(); } catch (e) { throw new Error('Exec failed: ' + e.message);}}};
 `;
-    case 'Bfs': return `import fs from 'fs';import path from 'path';export const CayjuLib = {readFile: (p, encoding = 'utf-8') => fs.readFileSync(p, encoding),writeFile: (p, content) => fs.writeFileSync(p, content),appendFile: (p, content) => fs.appendFileSync(p, content),};    `;
+    case 'Bfs': return `import fs from 'fs';import path from 'path';export const CajyuLib = {readFile: (p, encoding = 'utf-8') => fs.readFileSync(p, encoding),writeFile: (p, content) => fs.writeFileSync(p, content),appendFile: (p, content) => fs.appendFileSync(p, content),};    `;
     default: return '';
   }
 }
