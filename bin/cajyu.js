@@ -24,7 +24,7 @@ async function main() {
   if (hasFlag('h', 'help', '--help') || !command) { showHelp(); return; }
 
   switch (command) {
-    case 'init':    initProject(); break;
+    case 'init':    await initProject(); break;
     case 'inst':
     case 'install': await installLib(args[1]); break;
     case 'remove':  removeLib(args[1]); break;
@@ -76,7 +76,7 @@ Examples:
 }
 
 // ── init ─────────────────────────────────────────────────────────────────────
-function initProject() {
+async function initProject() {
   const pkg = {
     name: 'cajyu-project',
     version: '1.0.0',
@@ -95,9 +95,10 @@ function initProject() {
   }
   if (!fs.existsSync('CajyuLibs')) fs.mkdirSync('CajyuLibs');
   if (!fs.existsSync('index.cjy')) {
-    fs.writeFileSync('index.cjy', 'print("Hello from Cajyu!")\n');
+    fs.writeFileSync('index.cjy', 'import print from CajyuLibs.serial;\nprint("Hello from Cajyu!")\n');
     console.log('Created index.cjy');
   }
+  await installLib('serial');
   console.log('Cajyu project initialized.');
 }
 
