@@ -1,14 +1,15 @@
-# Exemplos Cajyu
+# Cajyu Examples
 
-| Arquivo              | Descrição                          |
-|----------------------|------------------------------------|
-| `01-hello.cjy`       | Imprime Olá, mundo!                |
-| `02-saudacao.cjy`    | Pede o nome e saúda                |
-| `03-servidor.cjy`    | Servidor HTTP simples              |
-| `04-websocket.cjy`   | WebSocket simples                  |
-| `05-completo.cjy`    | Exemplo combinando vários recursos |
+| File | Description |
+|------|-------------|
+| `basic.cjy` | Hello world, variables, conditionals |
+| `builtin.cjy` | Built-in functions (`len`, `range`) |
+| `functions-classes.cjy` | Functions and classes |
+| `libraries.cjy` | Using libraries (ReadLine) |
 
-Rode com:
+Run with:
 ```bash
-cajyu run examples/01-hello.cjy
+cajyu run examples/basic.cjy
 ```
+
+For a full learning path, see: https://github.com/abs-js/Cajyu-Roadline

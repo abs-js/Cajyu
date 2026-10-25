@@ -1,0 +1,12 @@
+import print from CajyuLibs.serial;
+
+print("Hello, world!");
+
+var name = "Cajyu";
+var age = 1;
+print("Name: " + name);
+print("Age: " + age);
+
+if age > 0 {
+  print("Cajyu is alive!");
+}

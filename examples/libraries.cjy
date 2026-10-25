@@ -1,0 +1,5 @@
+import print from CajyuLibs.serial;
+import input from CajyuLibs.ReadLine;
+
+var name = wait input("Your name: ");
+print("Hello, " + name + "!");
