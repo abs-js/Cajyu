@@ -27,7 +27,7 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 ```bash
 npm install -g cajyu
 cajyu init
-cajyu inst serial
+
 cajyu run index.cjy
 ```
 
@@ -35,6 +35,11 @@ cajyu run index.cjy
 # Or using npx
 npx cajyu -v
 ```
+
+NOTE: maybe index.cjy has an bug, so fix it if:
+1. Install serial with ´npx cajyu inst serial´.
+2. import it with ´import print from CajyuLibs.serial´ in top of file.
+
 
 ---
 
