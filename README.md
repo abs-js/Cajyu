@@ -1,5 +1,9 @@
 # Cajyu
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/abs-js/Cajyu/main/logos/logo-256.png" alt="Cajyu Logo" width="128">
+</p>
+
 **A clean, practical programming language that transpiles to JavaScript.**
 
 Cajyu gives you a simpler, more expressive syntax while staying fully compatible with the JavaScript ecosystem.
@@ -7,6 +11,15 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 [![npm](https://img.shields.io/badge/npm-cajyu-blue)](https://www.npmjs.com/package/cajyu)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](package.json)
+
+---
+
+## Logo
+
+Square logo versions available:
+- 64×64
+- 128×128
+- 256×256
 
 ---
 
