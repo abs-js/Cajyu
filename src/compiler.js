@@ -71,8 +71,96 @@ export async function compileAndRun(filePath) {
   }
 }
 
+// ─── Required semicolons ──────────────────────────────────────────────────────
+function validateSemicolons(source) {
+  const lines = source.split('\n');
+  let objectDepth = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const original = lines[i];
+    const line = original.trim();
+
+    // Ignora linhas vazias e comentários
+    if (!line || line.startsWith('//')) continue;
+
+    // Imports e exports também precisam terminar com ;
+    // O compilador validará as instruções comuns abaixo.
+
+    // Enquanto estivermos dentro de um objeto, suas propriedades
+    // não precisam terminar com ; individualmente.
+    if (objectDepth > 0) {
+      for (const ch of line) {
+        if (ch === '{') objectDepth++;
+        if (ch === '}') objectDepth--;
+      }
+
+      if (objectDepth < 0) objectDepth = 0;
+
+      // O objeto terminou: sua declaração deve acabar com ;
+      if (objectDepth === 0 && !line.endsWith(';')) {
+        throw new CajyuError(
+          'ERR011',
+          i + 1,
+          original.length,
+          original,
+          'Object declarations must end with ;'
+        );
+      }
+
+      continue;
+    }
+
+    // Identifica a abertura de um objeto em uma declaração.
+    if (/^(?:const|let|var)\s+[\w$]+(?:\s*:\s*\w+)?\s*=\s*\{/.test(line)) {
+      let depth = 0;
+
+      for (const ch of line) {
+        if (ch === '{') depth++;
+        if (ch === '}') depth--;
+      }
+
+      if (depth > 0) {
+        objectDepth = depth;
+        continue;
+      }
+
+      if (!line.endsWith(';')) {
+        throw new CajyuError(
+          'ERR011',
+          i + 1,
+          original.length,
+          original,
+          'Object declarations must end with ;'
+        );
+      }
+
+      continue;
+    }
+
+    // Blocos de código podem abrir sem ;.
+    if (line.endsWith('{')) continue;
+
+    // Fechamentos de blocos não precisam de ;.
+    if (line === '}' || line === '};' || line.startsWith('} else')) {
+      continue;
+    }
+
+    // Todo comando restante precisa terminar com ;
+    if (!line.endsWith(';')) {
+      throw new CajyuError(
+        'ERR011',
+        i + 1,
+        original.length,
+        original,
+        'Missing semicolon ;'
+      );
+    }
+  }
+}
+
 // ─── Transpiler ──────────────────────────────────────────────────────────────
 function transpile(source, baseDir) {
+  validateSemicolons(source);
   const lines  = source.split('\n');
   const imports  = [];
   const exports_ = [];
@@ -83,7 +171,7 @@ function transpile(source, baseDir) {
     const line = lines[i];
 
     const mImp = line.match(
-      /^\s*import\s+(\*|\w+)(?:\s+as\s+(\w+))?\s+from\s+['"]?([^\s'"]+)['"]?\s*;?\s*$/
+      /^\s*import\s+(\*|\w+)(?:\s+as\s+(\w+))?\s+from\s+['"]?([^;\s'"]+)['"]?\s*;\s*$/
     );
     if (mImp) {
       imports.push({ what: mImp[1], alias: mImp[2] || null, from: mImp[3], line: i + 1 });
