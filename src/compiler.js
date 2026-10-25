@@ -36,25 +36,14 @@ class CajyuError extends Error {
 }
 
 // ─── Built-in libraries ──────────────────────────────────────────────────────
-const BUILTIN_LIBS = new Set(['http', 'fs', 'Json', 'exec']);
+const BUILTIN_LIBS = new Set(['exec']);
 
 function builtinLibCode(name) {
   switch (name) {
-    case 'http': return `
-import _http from 'http';
-const http = {
-  createServer(handler) { return _http.createServer(handler); },
-  get(url, cb) {
-    return _http.get(url, res => {
-      let d = ''; res.on('data', c => d += c); res.on('end', () => cb(d, res));
-    });
-  },
-};`;
-    case 'fs':   return `import _fs from 'fs'; const fs = _fs;`;
-    case 'Json': return `const Json = { parse: JSON.parse, stringify: JSON.stringify };`;
-    case 'exec': return `
-import { execSync as _execSync } from 'child_process';
-const exec = { exec(cmd) { return _execSync(cmd, { encoding: 'utf-8' }); } };`;
+    case 'Bexec': return `
+import { execSync } from 'child_process'; export const CayjuLib = { exec: (command) => { try { return execSync(command, { encoding: 'utf-8' }).trim(); } catch (e) { throw new Error('Exec failed: ' + e.message);}}};
+`;
+    case 'Bfs': return `import fs from 'fs';import path from 'path';export const CayjuLib = {readFile: (p, encoding = 'utf-8') => fs.readFileSync(p, encoding),writeFile: (p, content) => fs.writeFileSync(p, content),appendFile: (p, content) => fs.appendFileSync(p, content),};    `;
     default: return '';
   }
 }
