@@ -6,60 +6,43 @@ import { execSync } from 'child_process';
 import { compileAndRun } from '../src/compiler.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 
 const CAJYULIBS_REPO = 'https://github.com/abs-js/CajyuLibs.git';
-const VERSION = '1.2.0';
+const VERSION = '1.2.3';
 
-const args = process.argv.slice(2);
+const args    = process.argv.slice(2);
 const command = args[0];
-const flags = args.filter(a => a.startsWith('-'));
+const flags   = args.filter(a => a.startsWith('-'));
 
 function hasFlag(...names) {
   return names.some(n => flags.includes(n) || flags.includes(`-${n}`) || flags.includes(`--${n}`));
 }
 
 async function main() {
-  if (hasFlag('v', 'version', '--version')) {
-    console.log(`Cajyu ${VERSION}`);
-    return;
-  }
+  if (hasFlag('v', 'version', '--version')) { console.log(`Cajyu ${VERSION}`); return; }
+  if (hasFlag('h', 'help', '--help') || !command) { showHelp(); return; }
 
-  if (hasFlag('h', 'help', '--help') || !command) {
-    showHelp();
-    return;
-  }
-
-  if (command === 'init') {
-    initProject();
-  } else if (command === 'inst' || command === 'install') {
-    const libName = args[1];
-    if (!libName || libName.startsWith('-')) {
-      console.error('Usage: cajyu inst <library>');
+  switch (command) {
+    case 'init':    initProject(); break;
+    case 'inst':
+    case 'install': await installLib(args[1]); break;
+    case 'remove':  removeLib(args[1]); break;
+    case 'run':     await runFile(); break;
+    case 'exec':    await execInline(args.slice(1).join(' ')); break;
+    case 'start':   await startProject(); break;
+    case 'list':    listInstalled(); break;
+    case 'update':  await updateLib(args[1]); break;
+    default:
+      console.error(`Unknown command: ${command}`);
+      showHelp();
       process.exit(1);
-    }
-    await installLib(libName);
-  } else if (command === 'run') {
-    const file = args.find(a => a.endsWith('.cjy') || (a !== 'run' && !a.startsWith('-')));
-    if (!file) {
-      console.error('Usage: cajyu run <file.cjy>');
-      process.exit(1);
-    }
-    await compileAndRun(file);
-  } else if (command === 'list') {
-    listInstalled();
-  } else if (command === 'update') {
-    console.log('Updating is not yet implemented. Re-run `cajyu inst <lib>` after deleting the folder.');
-  } else {
-    console.error(`Unknown command: ${command}`);
-    showHelp();
-    process.exit(1);
   }
 }
 
 function showHelp() {
   console.log(`
-Cajyu ${VERSION} — a custom programming language that transpiles to JavaScript
+Cajyu ${VERSION} — a programming language that transpiles to JavaScript
 
 Usage:
   cajyu [flags]
@@ -68,56 +51,103 @@ Usage:
 Commands:
   init              Create a new Cajyu project
   inst <lib>        Install a library from CajyuLibs
+  remove <lib>      Remove an installed library
   run <file.cjy>    Compile and execute a Cajyu file
+  exec "<code>"     Run a one-liner Cajyu expression
+  start             Run the mainScript from cajyu.json
   list              List installed libraries
-  update            Update installed libraries (coming soon)
+  update [lib]      Update one or all libraries
 
 Flags:
   -h, --help        Show this help
   -v, --version     Show version
 
+Built-in libraries (no install needed):
+  http, fs, Json, exec
+
 Examples:
   cajyu init
   cajyu inst http
-  cajyu inst websocket
   cajyu run examples/fatorial.cjy
+  cajyu start
+  cajyu exec "print(1 + 1)"
   cajyu list
 `);
 }
 
+// ── init ─────────────────────────────────────────────────────────────────────
 function initProject() {
   const pkg = {
-    name: "cajyu-project",
-    version: "1.0.0",
-    description: "Cajyu project",
-    main: "index.cjy",
-    type: "module"
+    name: 'cajyu-project',
+    version: '1.0.0',
+    description: 'A Cajyu project',
+    mainScript: 'index.cjy',
+    links: {},
+    dependences: {},
+    scripts: { start: 'cajyu run index.cjy' },
+    type: 'module',
   };
-  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+  if (!fs.existsSync('cajyu.json')) {
+    fs.writeFileSync('cajyu.json', JSON.stringify(pkg, null, 2));
+    console.log('Created cajyu.json');
+  } else {
+    console.log('cajyu.json already exists — skipped.');
+  }
+  // FIX #13: não cria package.json se já existe (evita conflito com projetos Node)
   if (!fs.existsSync('CajyuLibs')) fs.mkdirSync('CajyuLibs');
+  if (!fs.existsSync('index.cjy')) {
+    fs.writeFileSync('index.cjy', 'print("Hello from Cajyu!")\n');
+    console.log('Created index.cjy');
+  }
   console.log('Cajyu project initialized.');
 }
 
-async function installLib(libName) {
-  console.log(`Installing "${libName}" from CajyuLibs...`);
-
-  const targetDir = path.join(process.cwd(), 'CajyuLibs', libName);
-  if (fs.existsSync(targetDir)) {
-    console.log(`Library "${libName}" already installed.`);
-    return;
+// ── start ─────────────────────────────────────────────────────────────────────
+async function startProject() {
+  const cfgPath = path.resolve(process.cwd(), 'cajyu.json');
+  if (!fs.existsSync(cfgPath)) {
+    console.error('No cajyu.json found. Run `cajyu init` first.');
+    process.exit(1);
   }
+  const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'));
+  const entry = cfg.mainScript || 'index.cjy';
+  if (!fs.existsSync(entry)) {
+    console.error(`mainScript "${entry}" not found.`);
+    process.exit(1);
+  }
+  await compileAndRun(entry);
+}
+
+// ── exec (one-liner) ───────────────────────────────────────────────────────
+async function execInline(snippet) {
+  if (!snippet) { console.error('Usage: cajyu exec "<code>"'); process.exit(1); }
+  const tmpFile = path.join('/tmp', `cajyu_exec_${Date.now()}.cjy`);
+  fs.writeFileSync(tmpFile, snippet + '\n');
+  try { await compileAndRun(tmpFile); }
+  finally { try { fs.unlinkSync(tmpFile); } catch {} }
+}
+
+// ── run ────────────────────────────────────────────────────────────────────
+// FIX #10: só aceita argumento que termina em .cjy ou não é um comando conhecido
+const KNOWN_COMMANDS = new Set(['init','inst','install','remove','run','exec','start','list','update']);
+async function runFile() {
+  const file = args.find(a => a !== 'run' && !a.startsWith('-') && (a.endsWith('.cjy') || !KNOWN_COMMANDS.has(a)));
+  if (!file) { console.error('Usage: cajyu run <file.cjy>'); process.exit(1); }
+  await compileAndRun(file);
+}
+
+// ── inst ───────────────────────────────────────────────────────────────────
+async function installLib(libName) {
+  if (!libName || libName.startsWith('-')) { console.error('Usage: cajyu inst <library>'); process.exit(1); }
+  console.log(`Installing "${libName}" from CajyuLibs...`);
+  const targetDir = path.join(process.cwd(), 'CajyuLibs', libName);
+  if (fs.existsSync(targetDir)) { console.log(`Library "${libName}" already installed.`); return; }
 
   const tmpDir = path.join('/tmp', `cajyulibs-${Date.now()}`);
   try {
-    console.log('Cloning CajyuLibs repository...');
     execSync(`git clone --depth 1 ${CAJYULIBS_REPO} ${tmpDir}`, { stdio: 'inherit' });
-
     const sourceLib = path.join(tmpDir, libName);
-    if (!fs.existsSync(sourceLib)) {
-      console.error(`Library "${libName}" not found in CajyuLibs.`);
-      process.exit(1);
-    }
-
+    if (!fs.existsSync(sourceLib)) { console.error(`Library "${libName}" not found in CajyuLibs.`); process.exit(1); }
     fs.mkdirSync(path.dirname(targetDir), { recursive: true });
     fs.cpSync(sourceLib, targetDir, { recursive: true });
 
@@ -129,7 +159,6 @@ async function installLib(libName) {
         execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
       }
     }
-
     console.log(`✓ Library "${libName}" installed to CajyuLibs/${libName}/`);
   } catch (err) {
     console.error('Failed to install library:', err.message);
@@ -139,18 +168,41 @@ async function installLib(libName) {
   }
 }
 
+// ── remove ─────────────────────────────────────────────────────────────────
+function removeLib(libName) {
+  if (!libName) { console.error('Usage: cajyu remove <library>'); process.exit(1); }
+  const targetDir = path.join(process.cwd(), 'CajyuLibs', libName);
+  if (!fs.existsSync(targetDir)) { console.error(`Library "${libName}" is not installed.`); process.exit(1); }
+  fs.rmSync(targetDir, { recursive: true, force: true });
+  console.log(`✓ Library "${libName}" removed.`);
+}
+
+// ── update ─────────────────────────────────────────────────────────────────
+async function updateLib(libName) {
+  if (libName) {
+    const targetDir = path.join(process.cwd(), 'CajyuLibs', libName);
+    if (!fs.existsSync(targetDir)) { console.error(`Library "${libName}" not installed.`); process.exit(1); }
+    fs.rmSync(targetDir, { recursive: true, force: true });
+    await installLib(libName);
+  } else {
+    const libsDir = path.join(process.cwd(), 'CajyuLibs');
+    if (!fs.existsSync(libsDir)) { console.log('No libraries installed.'); return; }
+    const libs = fs.readdirSync(libsDir).filter(d => fs.statSync(path.join(libsDir, d)).isDirectory());
+    for (const lib of libs) await updateLib(lib);
+  }
+}
+
+// ── list ───────────────────────────────────────────────────────────────────
 function listInstalled() {
   const libsDir = path.join(process.cwd(), 'CajyuLibs');
-  if (!fs.existsSync(libsDir)) {
-    console.log('No libraries installed yet.');
-    return;
-  }
+  console.log('Built-in (always available): http, fs, Json, exec');
+  if (!fs.existsSync(libsDir)) { console.log('No external libraries installed.'); return; }
   const libs = fs.readdirSync(libsDir).filter(d => fs.statSync(path.join(libsDir, d)).isDirectory());
-  if (libs.length === 0) {
-    console.log('No libraries installed.');
-  } else {
-    console.log('Installed libraries:');
-    libs.forEach(l => console.log(`  - ${l}`));
+  if (libs.length === 0) { console.log('No external libraries installed.'); return; }
+  console.log('Installed:');
+  for (const l of libs) {
+    const hasCjy = fs.existsSync(path.join(libsDir, l, 'main.cjy'));
+    console.log(`  - ${l}${hasCjy ? ' (.cjy entry)' : ''}`);
   }
 }
 

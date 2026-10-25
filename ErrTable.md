@@ -52,3 +52,28 @@ There is an <error name> in line <n>: ERR0xx.
     <line content>
    ^
 ```
+
+## Added in 1.2.2
+
+| Code   | Name                    | Description                                      |
+|--------|-------------------------|--------------------------------------------------|
+| ERR021 | Invalid alias           | `as` used in an invalid context                  |
+| ERR022 | Invalid try/catch       | Malformed `try`/`catch` block                    |
+| ERR023 | Invalid export          | `export` used incorrectly                        |
+| ERR024 | Invalid const assignment| Attempt to reassign an immutable `const`         |
+| ERR025 | Invalid destroy usage   | `destroy()` called on a non-object/non-array     |
+| ERR026 | Built-in library error  | Error inside a built-in library (`http`, `fs`…)  |
+| ERR027 | Invalid library entry   | Library's `main.cjy` could not be transpiled     |
+| ERR028 | Invalid module export   | Module does not export the expected symbol       |
+| ERR029 | Invalid as target       | Alias target conflicts with an existing name     |
+| ERR030 | Unexpected keyword      | Reserved keyword used where not allowed          |
+| ERR031 | Invalid range arguments | Wrong argument count or type for `range()`       |
+| ERR032 | Invalid parameter       | Function parameter syntax is malformed           |
+| ERR033 | Circular import         | Two modules import each other                    |
+| ERR034 | Missing main script     | `cajyu.json` `mainScript` file not found         |
+| ERR035 | Script execution error  | Runtime error in the transpiled script           |
+| ERR036 | Unsupported feature     | Feature not yet implemented                      |
+| ERR037 | Invalid catch variable  | `catch` variable was not declared with `try`     |
+| ERR038 | Duplicate alias         | Same `as` alias used more than once in scope     |
+| ERR039 | Invalid spread          | `destroy()` argument cannot be spread            |
+| ERR040 | Permission denied       | File/system operation not permitted              |

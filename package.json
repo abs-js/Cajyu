@@ -1,7 +1,7 @@
 {
   "name": "cajyu",
-  "version": "1.2.2",
-  "description": "Cajyu programming language - a custom language that compiles to JavaScript",
+  "version": "1.2.3",
+  "description": "Cajyu programming language — a custom language that compiles to JavaScript",
   "main": "src/compiler.js",
   "bin": {
     "cajyu": "./bin/cajyu.js"

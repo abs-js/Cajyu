@@ -10,7 +10,7 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 
 [![npm](https://img.shields.io/badge/npm-cajyu-blue)](https://www.npmjs.com/package/cajyu)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.1-brightgreen)](package.json)
+[![Version](https://img.shields.io/badge/version-1.2.3-brightgreen)](package.json)
 
 ---
 
@@ -20,7 +20,13 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 - Transpiles to modern JavaScript
 - Real HTTP server with POST handlers, sleep/wake
 - WebSocket that automatically sends and receives JSON
-- Official libraries: `serial`, `fs`, `math`, `http`, `websocket`, `string`, `json`, `exec`, `fetch`
+- Built-in libraries (no install needed): `http`, `fs`, `Json`, `exec`
+- Official external libraries: `serial`, `math`, `websocket`, `string`, `fetch`
+- `const` for immutable bindings (objects remain mutable inside)
+- `try`/`catch` with special error sentinels (`E***`)
+- `as` aliasing for imports, catch variables and function parameters
+- `destroy()` to spread an object as positional arguments
+- Libraries can have a `.cjy` main entry point
 - Optional runtime typing
 - Async with `sync fn` and `wait`
 - One-liners and stacking
@@ -31,18 +37,15 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 ## Quick Start
 
 ```bash
-# After publishing
 npm install -g cajyu
 
-# Or from source
-node bin/cajyu.js --help
+cajyu init
+cajyu run index.cjy
 ```
 
 ```bash
-cajyu init
-cajyu inst serial
-cajyu inst http
-cajyu run examples/fatorial.cjy
+# Or from source
+node bin/cajyu.js --help
 ```
 
 ---
@@ -54,13 +57,16 @@ cajyu [flags]
 cajyu <command> [options]
 ```
 
-| Command          | Description                          |
-|------------------|--------------------------------------|
-| `init`           | Create a new project                 |
-| `inst <lib>`     | Install a library from CajyuLibs     |
-| `run <file.cjy>` | Compile and run a file               |
-| `list`           | List installed libraries             |
-| `update`         | Update libraries (planned)           |
+| Command              | Description                                |
+|----------------------|--------------------------------------------|
+| `init`               | Create a new Cajyu project (`cajyu.json`)  |
+| `inst <lib>`         | Install a library from CajyuLibs           |
+| `remove <lib>`       | Remove an installed library                |
+| `run <file.cjy>`     | Compile and run a file                     |
+| `exec "<code>"`      | Run a one-liner Cajyu expression           |
+| `start`              | Run `mainScript` from `cajyu.json`         |
+| `list`               | List built-in and installed libraries      |
+| `update [lib]`       | Update one or all installed libraries      |
 
 | Flag             | Description          |
 |------------------|----------------------|
@@ -69,22 +75,129 @@ cajyu <command> [options]
 
 ---
 
+## Project file: `cajyu.json`
+
+`cajyu init` generates a `cajyu.json` (instead of `package.json`) that Cajyu projects use:
+
+```json
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "description": "",
+  "mainScript": "index.cjy",
+  "links": {},
+  "dependences": {},
+  "scripts": {
+    "start": "cajyu run index.cjy"
+  },
+  "type": "module"
+}
+```
+
+Run the project entry point with `cajyu start`.
+
+---
+
 ## Syntax
 
 ### Variables
+
 ```cajyu
 var name = "Cajyu"
 var age:Number = 17
+
+// const → immutable binding; object contents can still be added to
+const PI = 3.14159
+const config = { debug: false }
+config.debug = true   // OK — object mutation is allowed
+// PI = 3            // ← runtime error
 ```
 
 ### Functions
+
 ```cajyu
 fn add a, b {
   return a + b
 }
+
+// as: rename a parameter inside the function body
+fn greet name as n, lang as l {
+  if l == "pt" return "Olá, " + n
+  return "Hello, " + n
+}
 ```
 
+### Imports & exports
+
+```cajyu
+// Simple import
+import fs from CajyuLibs.fs
+
+// Alias: use `l` instead of `log` in this file
+import log as l from utils
+
+// Export
+export myFunction
+```
+
+### Built-in libraries (no `cajyu inst` needed)
+
+```cajyu
+import http from http
+import fs   from fs
+import Json from Json
+import exec from exec
+```
+
+### try / catch
+
+```cajyu
+// const result = try <expr> — result is E*** on error, value on success
+const result = try divide(10, 0);
+
+catch result {
+  // executed only if result is an error sentinel
+  print("Division failed: " + result)
+}
+
+// catch with alias
+const data = try Json.parse(raw);
+catch data as e {
+  print("Parse error: " + e)
+}
+
+// works in if too
+if result {
+  print("got: " + result)
+}
+```
+
+Error sentinels can be compared but are **not** strings — they carry an `E***` code and a message.
+
+### as — aliasing
+
+`as` works in three places:
+
+| Context               | Example                                     |
+|-----------------------|---------------------------------------------|
+| Import alias          | `import log as l from utils`                |
+| Catch variable alias  | `catch err as e { ... }`                    |
+| Function param alias  | `fn foo a as x, b as y { uses x and y }`   |
+
+### destroy — spread object as arguments
+
+```cajyu
+var obj = { a: 2, b: 4 }
+fn add a, b { return a + b }
+
+var result = add(destroy(obj))   // → 6
+// destroy also works with arrays
+```
+
+`destroy(x)` spreads `x`'s values as positional arguments. If `x` is an array it spreads it directly.
+
 ### Control flow & loops
+
 ```cajyu
 if x > 10 {
   print("big")
@@ -94,17 +207,21 @@ if x > 10 {
   print("small")
 }
 
-for i in range(10) {
+for i in range(10) {   // range(n) → 0 to n-1
   print(i)
 }
+
+for i in range(1, 5) { print(i) }        // 1 to 5
+for i in range(0, 10, 2) { print(i) }   // 0, 2, 4 …
 ```
 
 ### Classes
+
 ```cajyu
 class Person {
   Main name, age {
     Self.name = name
-    Self.age = age
+    Self.age  = age
   }
   greet {
     return "Hello, " + Self.name
@@ -112,7 +229,17 @@ class Person {
 }
 ```
 
-### HTTP
+### Async
+
+```cajyu
+sync fn fetchData url {
+  var res = wait fetch(url)
+  return res
+}
+```
+
+### HTTP (built-in)
+
 ```cajyu
 import Server from CajyuLibs.http
 
@@ -126,19 +253,10 @@ server.post(fn b {
 })
 ```
 
-### WebSocket (JSON)
-```cajyu
-import WS from CajyuLibs.websocket
-
-var wss = new WS.Server(8080)
-wss.on("message", fn msg, client {
-  wss.broadcast({ echo: msg })
-})
-```
-
 ### Exec & Fetch
+
 ```cajyu
-import exec from CajyuLibs.exec
+import exec from exec
 var files = exec.exec("ls -a")
 
 import fetch from CajyuLibs.fetch
@@ -151,19 +269,28 @@ fetch.fetch("https://api.github.com", {}, null, fn result, ms {
 
 ## Libraries
 
-Official libraries: https://github.com/abs-js/CajyuLibs
+### Built-in (always available, no install)
+
+| Name   | Description                     |
+|--------|---------------------------------|
+| `http` | Basic HTTP server and GET       |
+| `fs`   | Node.js filesystem (`fs`)       |
+| `Json` | `Json.parse` / `Json.stringify` |
+| `exec` | Shell command execution         |
+
+### External (install with `cajyu inst`)
 
 ```bash
 cajyu inst serial
-cajyu inst fs
 cajyu inst math
-cajyu inst http
 cajyu inst websocket
 cajyu inst string
-cajyu inst json
-cajyu inst exec
 cajyu inst fetch
 ```
+
+Official libraries: https://github.com/abs-js/CajyuLibs
+
+Libraries may ship a `main.cjy` entry point — Cajyu will transpile it automatically when imported.
 
 ---
 
