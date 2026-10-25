@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const CAJYULIBS_REPO = 'https://github.com/abs-js/CajyuLibs.git';
-const VERSION = '1.2.3';
+const VERSION = '1.2.5';
 
 const args    = process.argv.slice(2);
 const command = args[0];
@@ -93,7 +93,6 @@ function initProject() {
   } else {
     console.log('cajyu.json already exists — skipped.');
   }
-  // FIX #13: não cria package.json se já existe (evita conflito com projetos Node)
   if (!fs.existsSync('CajyuLibs')) fs.mkdirSync('CajyuLibs');
   if (!fs.existsSync('index.cjy')) {
     fs.writeFileSync('index.cjy', 'print("Hello from Cajyu!")\n');
@@ -128,7 +127,6 @@ async function execInline(snippet) {
 }
 
 // ── run ────────────────────────────────────────────────────────────────────
-// FIX #10: só aceita argumento que termina em .cjy ou não é um comando conhecido
 const KNOWN_COMMANDS = new Set(['init','inst','install','remove','run','exec','start','list','update']);
 async function runFile() {
   const file = args.find(a => a !== 'run' && !a.startsWith('-') && (a.endsWith('.cjy') || !KNOWN_COMMANDS.has(a)));
