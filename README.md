@@ -20,15 +20,8 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 - Transpiles to modern JavaScript
 - Real HTTP server with POST handlers, sleep/wake
 - WebSocket that automatically sends and receives JSON
-- Built-in libraries (no install needed): `http`, `fs`, `Json`, `exec`
-- Official external libraries: `serial`, `math`, `websocket`, `string`, `fetch`
-- `const` for immutable bindings (objects remain mutable inside)
-- `try`/`catch` with special error sentinels (`E***`)
-- `as` aliasing for imports, catch variables and function parameters
-- `destroy()` to spread an object as positional arguments
 - Libraries can have a `.cjy` main entry point
 - Optional runtime typing
-- Async with `sync fn` and `wait`
 - One-liners and stacking
 - CLI with flags and multiple commands
 
@@ -140,12 +133,10 @@ import log as l from utils
 export myFunction
 ```
 
-### Built-in libraries (no `cajyu inst` needed)
+### Built-in libraries (no `cajyu inst` needed, but has less things)
 
 ```cajyu
-import http from http
 import fs   from fs
-import Json from Json
 import exec from exec
 ```
 
@@ -238,7 +229,7 @@ sync fn fetchData url {
 }
 ```
 
-### HTTP (built-in)
+### HTTP
 
 ```cajyu
 import Server from CajyuLibs.http
@@ -273,9 +264,7 @@ fetch.fetch("https://api.github.com", {}, null, fn result, ms {
 
 | Name   | Description                     |
 |--------|---------------------------------|
-| `http` | Basic HTTP server and GET       |
-| `fs`   | Node.js filesystem (`fs`)       |
-| `Json` | `Json.parse` / `Json.stringify` |
+| `fs`   | Node.js filesystem (`fs`), but there is more things in installed lib  |
 | `exec` | Shell command execution         |
 
 ### External (install with `cajyu inst`)
