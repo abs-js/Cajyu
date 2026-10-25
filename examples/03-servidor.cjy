@@ -1,0 +1,10 @@
+import Server from CajyuLibs.http;
+import print from CajyuLibs.serial;
+
+var server = new Server(3000);
+print("Servidor rodando em http://localhost:3000");
+
+var html = "<!DOCTYPE html><html><body><h1>Olá do Cajyu!</h1><p>Servidor simples.</p></body></html>";
+
+server.file("/", html);
+server.file("index.html", html);
