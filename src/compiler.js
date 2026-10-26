@@ -135,7 +135,13 @@ export function transpile(source, baseDir, filePath = '<unknown>') {
     const libPath = resolveLib(imp.from, baseDir);
     if (libPath && fs.existsSync(libPath)) {
       const url = pathToFileURL(libPath).href;
-      if (imp.what === '*') {
+      if (imp.names) {
+        const uid = `_lib_named_${libCounter++}`;
+        importCode += `const ${uid} = await import('${url}');\n`;
+        for (const item of imp.names) {
+          importCode += `const ${item.alias} = ${uid}[${JSON.stringify(item.imported)}] ?? ${uid}.CajyuLib?.[${JSON.stringify(item.imported)}];\n`;
+        }
+      } else if (imp.what === '*') {
         const uid = `_lib_star_${libCounter++}`;
         importCode += `const ${uid} = await import('${url}'); Object.assign(globalThis, ${uid}.CajyuLib || ${uid});\n`;
       } else {
@@ -201,7 +207,10 @@ function resolveLib(from, baseDir) {
     return found;
   }
   const resolved = path.resolve(baseDir, from);
+  // Compile explicit .cjy paths instead of treating them as JavaScript.
+  if (resolved.endsWith('.cjy') && fs.existsSync(resolved)) return compileCjyLib(resolved);
   if (fs.existsSync(resolved + '.cjy')) return compileCjyLib(resolved + '.cjy');
+  if (fs.existsSync(resolved + '.js')) return resolved + '.js';
   return resolved;
 }
 

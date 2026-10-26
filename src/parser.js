@@ -94,16 +94,29 @@ export class Parser {
   // ── import ─────────────────────────────────────────────────────────────────
   parseImport() {
     this.expect(TT.KEYWORD, 'import');
-    const what  = this.expect(TT.IDENT).value;
+    const names = [];
+    const first = this.expect(TT.IDENT).value;
+    names.push({ imported: first, alias: first });
+    while (this.match(TT.COMMA)) {
+      const imported = this.expect(TT.IDENT).value;
+      let alias = imported;
+      if (this.check(TT.KEYWORD, 'as')) { this.advance(); alias = this.expect(TT.IDENT).value; }
+      names.push({ imported, alias });
+    }
     let alias = null;
-    if (this.check(TT.KEYWORD, 'as')) { this.advance(); alias = this.expect(TT.IDENT).value; }
+    if (names.length === 1 && this.check(TT.KEYWORD, 'as')) {
+      this.advance();
+      alias = this.expect(TT.IDENT).value;
+      names[0].alias = alias;
+    }
+    const what = names.length === 1 ? names[0].imported : '*';
     this.expect(TT.KEYWORD, 'from');
     // lib pode ser bareword ou string
     const from = this.peek().type === TT.STRING
       ? this.advance().value
       : this.parseLibPath();
     this.match(TT.SEMICOLON); this.match(TT.NEWLINE);
-    return n('Import', { what, alias, from });
+    return n('Import', { what, alias, names: names.length > 1 ? names : null, from });
   }
 
   parseLibPath() {
@@ -321,6 +334,12 @@ export class Parser {
     if (this.check(TT.KEYWORD, 'not') || this.check(TT.NOT)) {
       const op = this.advance().value;
       return n('UnaryOp', { op: '!', operand: this.parseUnary() });
+    }
+    // Prefix increment/decrement
+    if (this.check(TT.INC) || this.check(TT.DEC)) {
+      const op = this.advance().value;
+      const operand = this.parseUnary();
+      return n('Update', { op, operand, prefix: true });
     }
     // - unário
     if (this.check(TT.MINUS)) {

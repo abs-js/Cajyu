@@ -95,7 +95,13 @@ export function tokenize(source) {
       let str = '';
       while (pos < source.length && peek() !== ch) {
         const c = advance();
-        if (c === '\\') { str += c + advance(); continue; }
+        if (c === '\\') {
+          const escaped = advance();
+          const escapes = { n: '\n', r: '\r', t: '\t', b: '\b', f: '\f', v: '\v', '0': '\0' };
+          str += Object.prototype.hasOwnProperty.call(escapes, escaped) ? escapes[escaped] : escaped;
+          continue;
+        }
+        if (c === '\n') throw new LexerError('Unescaped newline in string', startLine, startCol, currentLine());
         str += c;
       }
       if (pos >= source.length) throw new LexerError('Unterminated string', startLine, startCol, currentLine());
