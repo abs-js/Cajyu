@@ -1,7 +1,18 @@
-import print from CajyuLibs.serial;
+// Exemplo de built-ins Bfs e Bexec
+import Bfs   from Bfs
+import Bexec from Bexec
 
-print(len("hello"));
-print(range(5));
+// Escrita e leitura de arquivo
+Bfs.write("teste.txt", "Olá do Cajyu!")
+var conteudo = Bfs.read("teste.txt")
+print(conteudo)
 
-var arr = [1, 2, 3];
-print(len(arr));
+// Verificar existência
+print(Bfs.exists("teste.txt"))
+
+// Executar comando
+var resultado = Bexec.run("echo Hello from shell")
+print(resultado)
+
+// Limpar
+Bfs.remove("teste.txt")

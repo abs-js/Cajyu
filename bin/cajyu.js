@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const CAJYULIBS_REPO = 'https://github.com/abs-js/CajyuLibs.git';
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 
 const args    = process.argv.slice(2);
 const command = args[0];
@@ -63,11 +63,11 @@ Flags:
   -v, --version     Show version
 
 Built-in libraries (no install needed):
-  http, fs, Json, exec
+  Bfs, Bexec
 
 Examples:
   cajyu init
-  cajyu inst http
+  cajyu inst serial
   cajyu run examples/fatorial.cjy
   cajyu start
   cajyu exec "print(1 + 1)"
@@ -95,11 +95,11 @@ async function initProject() {
   }
   if (!fs.existsSync('CajyuLibs')) fs.mkdirSync('CajyuLibs');
   if (!fs.existsSync('index.cjy')) {
-    fs.writeFileSync('index.cjy', 'import print from CajyuLibs.serial;\nprint("Hello from Cajyu!")\n');
+    fs.writeFileSync('index.cjy', 'print("Hello from Cajyu!")\n');
     console.log('Created index.cjy');
   }
-  await installLib('serial');
   console.log('Cajyu project initialized.');
+  console.log('Tip: run `cajyu inst serial` to install the serial (print/input) library.');
 }
 
 // ── start ─────────────────────────────────────────────────────────────────────
