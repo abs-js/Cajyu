@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1 — Bugfix release
+- Corrigido o tratamento de escapes e quebras de linha em strings.
+- Corrigida a resolução de caminhos explícitos `.cjy` para compilação de bibliotecas.
+- Atualizada a versão do CLI e do pacote para 1.4.1.
+
 ## 1.4.0 — Major release
 - **Parser rewrite**: substituição completa do transpilador regex-based por pipeline Lexer → AST → Codegen
   - `src/lexer.js`: tokenizador completo com suporte a strings, template strings, comentários de bloco, todos os operadores
