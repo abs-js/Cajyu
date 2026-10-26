@@ -8,3 +8,5 @@ var html = "<!DOCTYPE html><html><body><h1>Olá do Cajyu!</h1><p>Servidor simple
 
 server.file("/", html);
 server.file("index.html", html);
+
+server.start();
