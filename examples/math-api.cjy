@@ -1,0 +1,25 @@
+import Server from CajyuLibs.http;
+import print from CajyuLibs.serial;
+import math from CajyuLibs.math;
+
+var server = new Server(3000);
+print("Math API running at http://localhost:3000");
+
+server.post(fn b {
+  if !b.a or !b.b {
+    return { code: 400, error: "Missing a or b" };
+  }
+
+  var sum = math.add(b.a, b.b);
+  var sub = math.sub(b.a, b.b);
+  var mul = math.mul(b.a, b.b);
+  var div = math.div(b.a, b.b);
+
+  return {
+    code: 200,
+    sum: sum,
+    sub: sub,
+    mul: mul,
+    div: div
+  };
+});
