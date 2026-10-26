@@ -1,0 +1,5 @@
+{
+  "name": "cajyu-fs",
+  "type": "module",
+  "main": "main.js"
+}

@@ -1,0 +1,7 @@
+import Server from CajyuLibs.http;
+import fs from CajyuLibs.fs;
+
+const s = new Server(3000);
+
+s.file("/index.html", fs.readFile("./public/index.html"), "html");
+s.start();

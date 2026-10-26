@@ -1,0 +1,5 @@
+{
+  "name": "cajyu-serial",
+  "type": "module",
+  "main": "main.js"
+}

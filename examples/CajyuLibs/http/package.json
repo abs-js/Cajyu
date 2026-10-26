@@ -1,0 +1,5 @@
+{
+  "name": "cajyu-http",
+  "type": "module",
+  "main": "main.js"
+}
