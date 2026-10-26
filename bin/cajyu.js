@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const CAJYULIBS_REPO = 'https://github.com/abs-js/CajyuLibs.git';
-const VERSION = '1.2.5';
+const VERSION = '1.3.0';
 
 const args    = process.argv.slice(2);
 const command = args[0];
