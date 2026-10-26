@@ -135,7 +135,13 @@ export function transpile(source, baseDir, filePath = '<unknown>') {
     const libPath = resolveLib(imp.from, baseDir);
     if (libPath && fs.existsSync(libPath)) {
       const url = pathToFileURL(libPath).href;
-      if (imp.what === '*') {
+      if (imp.names) {
+        const uid = `_lib_named_${libCounter++}`;
+        importCode += `const ${uid} = await import('${url}');\n`;
+        for (const item of imp.names) {
+          importCode += `const ${item.alias} = ${uid}[${JSON.stringify(item.imported)}] ?? ${uid}.CajyuLib?.[${JSON.stringify(item.imported)}];\n`;
+        }
+      } else if (imp.what === '*') {
         const uid = `_lib_star_${libCounter++}`;
         importCode += `const ${uid} = await import('${url}'); Object.assign(globalThis, ${uid}.CajyuLib || ${uid});\n`;
       } else {
