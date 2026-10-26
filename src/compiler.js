@@ -201,7 +201,10 @@ function resolveLib(from, baseDir) {
     return found;
   }
   const resolved = path.resolve(baseDir, from);
+  // Compile explicit .cjy paths instead of treating them as JavaScript.
+  if (resolved.endsWith('.cjy') && fs.existsSync(resolved)) return compileCjyLib(resolved);
   if (fs.existsSync(resolved + '.cjy')) return compileCjyLib(resolved + '.cjy');
+  if (fs.existsSync(resolved + '.js')) return resolved + '.js';
   return resolved;
 }
 
