@@ -475,20 +475,35 @@ export class Parser {
   parseArgList() {
     this.expect(TT.LPAREN);
     const args = [];
+  
+    this.skipNewlines();
+  
     while (!this.check(TT.RPAREN) && !this.isEOF()) {
-      if (this.check(TT.SPREAD)) { this.advance(); args.push(n('Spread', { expr: this.parseExpr() })); }
-      else if (this.check(TT.KEYWORD, 'destroy')) {
-        this.advance(); this.expect(TT.LPAREN);
-        const expr = this.parseExpr(); this.expect(TT.RPAREN);
+      if (this.check(TT.SPREAD)) {
+        this.advance();
+        args.push(n('Spread', { expr: this.parseExpr() }));
+      } else if (this.check(TT.KEYWORD, 'destroy')) {
+        this.advance();
+        this.expect(TT.LPAREN);
+        this.skipNewlines();
+        const expr = this.parseExpr();
+        this.skipNewlines();
+        this.expect(TT.RPAREN);
         args.push(n('Destroy', { expr }));
+      } else {
+        args.push(this.parseExpr());
       }
-      else args.push(this.parseExpr());
-      this.match(TT.COMMA);
+  
+      this.skipNewlines();
+  
+      if (!this.match(TT.COMMA)) break;
+      this.skipNewlines();
     }
+  
+    this.skipNewlines();
     this.expect(TT.RPAREN);
     return args;
   }
-}
 
 // ─── Binding powers (Pratt) ───────────────────────────────────────────────────
 function infixBP(token) {
