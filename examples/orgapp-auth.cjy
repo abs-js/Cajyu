@@ -18,14 +18,14 @@ app.use(fn ctx, res, next {
 });
 
 app.use(fn ctx, res, next {
-  var rotasPublicas = ["/", "/login", "/registrar"];
-  var ehPublica = false;
-  for i in rotasPublicas {
-    if i == ctx.url {
-      ehPublica = true;
+  var publicRoutes = ["/", "/login", "/register"];
+  var isPublic = false;
+  for route in publicRoutes {
+    if route == ctx.url {
+      isPublic = true;
     }
   }
-  if ehPublica {
+  if isPublic {
     wait next();
     return;
   }
@@ -44,76 +44,76 @@ app.get("/", fn ctx {
     "<h1>Orgapp Example</h1>" +
     "<p>Available routes:</p>" +
     "<ul>" +
-    "<li>POST /registrar — { nome, senha }</li>" +
-    "<li>POST /login     — { nome, senha }</li>" +
-    "<li>GET  /perfil    — x-token required</li>" +
-    "<li>GET  /usuarios  — x-token required</li>" +
-    "<li>POST /post      — { titulo, corpo } + x-token</li>" +
-    "<li>GET  /posts     — x-token required</li>" +
+    "<li>POST /register — { name, password }</li>" +
+    "<li>POST /login    — { name, password }</li>" +
+    "<li>GET  /profile  — x-token required</li>" +
+    "<li>GET  /users    — x-token required</li>" +
+    "<li>POST /post     — { title, body } + x-token</li>" +
+    "<li>GET  /posts    — x-token required</li>" +
     "</ul></body></html>";
 });
 
-app.post("/registrar", fn ctx {
+app.post("/register", fn ctx {
   if ctx.unauthorized {
-    return { erro: "Não autorizado", code: 401 };
+    return { error: "Unauthorized", code: 401 };
   }
-  var nome  = ctx.body.nome;
-  var senha = ctx.body.senha;
-  if !nome or !senha {
-    return { erro: "nome e senha obrigatórios", code: 400 };
+  var name     = ctx.body.name;
+  var password = ctx.body.password;
+  if !name or !password {
+    return { error: "name and password are required", code: 400 };
   }
-  var existe = false;
+  var exists = false;
   for u in db.users {
-    if u.nome == nome {
-      existe = true;
+    if u.name == name {
+      exists = true;
     }
   }
-  if existe {
-    return { erro: "Usuário já existe", code: 409 };
+  if exists {
+    return { error: "User already exists", code: 409 };
   }
-  var hash = new Hash(senha);
+  var hash = new Hash(password);
   var user = {
-    id:    db.nextId,
-    nome:  nome,
-    senha: hash.hash,
-    posts: []
+    id:       db.nextId,
+    name:     name,
+    password: hash.hash,
+    posts:    []
   };
   db.nextId = db.nextId + 1;
   db.users.push(user);
-  print("Usuário criado: " + nome);
-  return { mensagem: "Usuário criado", id: user.id };
+  print("User created: " + name);
+  return { message: "User created", id: user.id };
 });
 
 app.post("/login", fn ctx {
-  var nome  = ctx.body.nome;
-  var senha = ctx.body.senha;
-  if !nome or !senha {
-    return { erro: "nome e senha obrigatórios", code: 400 };
+  var name     = ctx.body.name;
+  var password = ctx.body.password;
+  if !name or !password {
+    return { error: "name and password are required", code: 400 };
   }
   var user = null;
   for u in db.users {
-    if u.nome == nome {
+    if u.name == name {
       user = u;
     }
   }
   if !user {
-    return { erro: "Usuário não encontrado", code: 404 };
+    return { error: "User not found", code: 404 };
   }
-  var hash = new Hash(senha);
-  if hash.hash != user.senha {
-    return { erro: "Senha incorreta", code: 401 };
+  var hash = new Hash(password);
+  if hash.hash != user.password {
+    return { error: "Incorrect password", code: 401 };
   }
   var tk    = new Token({ expires: 3600 });
-  var chave = "token:" + tk.token;
-  wait session.set(chave, user.id);
-  wait session.ttl(chave, 3600);
-  print("Login: " + nome + " | token: " + tk.token);
-  return { token: tk.token, nome: user.nome };
+  var key   = "token:" + tk.token;
+  wait session.set(key, user.id);
+  wait session.ttl(key, 3600);
+  print("Login: " + name + " | token: " + tk.token);
+  return { token: tk.token, name: user.name };
 });
 
-app.get("/perfil", fn ctx {
+app.get("/profile", fn ctx {
   if ctx.unauthorized {
-    return { erro: "Não autorizado", code: 401 };
+    return { error: "Unauthorized", code: 401 };
   }
   var user = null;
   for u in db.users {
@@ -122,34 +122,34 @@ app.get("/perfil", fn ctx {
     }
   }
   if !user {
-    return { erro: "Usuário não encontrado", code: 404 };
+    return { error: "User not found", code: 404 };
   }
   return {
     id:    user.id,
-    nome:  user.nome,
+    name:  user.name,
     posts: user.posts.length
   };
 });
 
-app.get("/usuarios", fn ctx {
+app.get("/users", fn ctx {
   if ctx.unauthorized {
-    return { erro: "Não autorizado", code: 401 };
+    return { error: "Unauthorized", code: 401 };
   }
-  var lista = [];
+  var list = [];
   for u in db.users {
-    lista.push({ id: u.id, nome: u.nome, posts: u.posts.length });
+    list.push({ id: u.id, name: u.name, posts: u.posts.length });
   }
-  return { total: lista.length, usuarios: lista };
+  return { total: list.length, users: list };
 });
 
 app.post("/post", fn ctx {
   if ctx.unauthorized {
-    return { erro: "Não autorizado", code: 401 };
+    return { error: "Unauthorized", code: 401 };
   }
-  var titulo = ctx.body.titulo;
-  var corpo  = ctx.body.corpo;
-  if !titulo or !corpo {
-    return { erro: "titulo e corpo obrigatórios", code: 400 };
+  var title = ctx.body.title;
+  var body  = ctx.body.body;
+  if !title or !body {
+    return { error: "title and body are required", code: 400 };
   }
   var user = null;
   for u in db.users {
@@ -158,34 +158,34 @@ app.post("/post", fn ctx {
     }
   }
   if !user {
-    return { erro: "Usuário não encontrado", code: 404 };
+    return { error: "User not found", code: 404 };
   }
   var post = {
     id:     user.posts.length + 1,
-    titulo: titulo,
-    corpo:  corpo,
-    autor:  user.nome
+    title:  title,
+    body:   body,
+    author: user.name
   };
   user.posts.push(post);
-  print("Post criado por " + user.nome + ": " + titulo);
-  return { mensagem: "Post criado", post: post };
+  print("Post created by " + user.name + ": " + title);
+  return { message: "Post created", post: post };
 });
 
 app.get("/posts", fn ctx {
   if ctx.unauthorized {
-    return { erro: "Não autorizado", code: 401 };
+    return { error: "Unauthorized", code: 401 };
   }
-  var todos = [];
+  var allPosts = [];
   for u in db.users {
     for p in u.posts {
-      todos.push(p);
+      allPosts.push(p);
     }
   }
-  return { total: todos.length, posts: todos };
+  return { total: allPosts.length, posts: allPosts };
 });
 
-print("Orgapp rodando em http://localhost:3000");
-print("Teste:");
-print("  POST /registrar  { nome, senha }");
-print("  POST /login      { nome, senha }");
-print("  GET  /perfil     x-token: <token>");
+print("Orgapp running at http://localhost:3000");
+print("Test:");
+print("  POST /register  { name, password }");
+print("  POST /login     { name, password }");
+print("  GET  /profile   x-token: <token>");
