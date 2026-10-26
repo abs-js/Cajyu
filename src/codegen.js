@@ -14,8 +14,21 @@ export function generate(ast) {
   const stmts    = [];
 
   for (const node of ast.body) {
-    if (node.type === 'Import') { imports.push(node); continue; }
-    if (node.type === 'Export') { exports_.push(node); continue; }
+    if (node.type === 'Import') {
+      imports.push(node);
+      continue;
+    }
+
+    if (node.type === 'Export') {
+      exports_.push(node);
+
+      if (node.declaration) {
+        stmts.push(node.declaration);
+      }
+
+      continue;
+    }
+
     stmts.push(node);
   }
 

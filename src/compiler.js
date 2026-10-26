@@ -153,16 +153,41 @@ export function transpile(source, baseDir, filePath = '<unknown>') {
     }
   }
 
-  // ── 5. Build export block ─────────────────────────────────────────────────
+  // ── 5. Build export block ────────────────────────────────────────────────
   const exportNames = exports_.map(e => e.name);
-  const exportDecls = exportNames.map(n => `let ${n};`).join('\n');
-  const exportStmt  = exportNames.length > 0
+
+  const exportDecls = exportNames
+    .map(name => `let ${name};`)
+    .join('\n');
+
+  const exportStmt = exportNames.length > 0
     ? `export { ${exportNames.join(', ')} };`
     : '';
 
+  const exportedDeclarations = new Set(
+    exports_
+      .filter(e => e.declaration)
+      .map(e => e.name)
+  );
+
   // ── 6. Emit body ──────────────────────────────────────────────────────────
   const bodyLines = stmts
-    .map(s => emitWithTryVarDecl(s))
+    .map(s => {
+      if (
+        s.type === 'VarDecl' &&
+        exportedDeclarations.has(s.name)
+      ) {
+        const value = emit(s.value);
+
+        if (s.typeAnnotation) {
+          return `${s.name} = _typeCheck(${value}, ${JSON.stringify(s.typeAnnotation)});`;
+        }
+
+        return `${s.name} = ${value};`;
+      }
+
+      return emitWithTryVarDecl(s);
+    })
     .filter(Boolean)
     .join('\n');
 

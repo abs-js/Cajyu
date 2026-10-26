@@ -130,10 +130,21 @@ export class Parser {
   }
 
   // ── export ─────────────────────────────────────────────────────────────────
+
   parseExport() {
     this.expect(TT.KEYWORD, 'export');
+
+    if (this.check(TT.KEYWORD, 'const') || this.check(TT.KEYWORD, 'var')) {
+      const declaration = this.parseVarDecl();
+      return n('Export', {
+        name: declaration.name,
+        declaration
+      });
+    }
+
     const name = this.expect(TT.IDENT).value;
-    this.match(TT.SEMICOLON); this.match(TT.NEWLINE);
+    this.match(TT.SEMICOLON);
+    this.match(TT.NEWLINE);
     return n('Export', { name });
   }
 
@@ -426,11 +437,24 @@ export class Parser {
     if (t.type === TT.LBRACKET) {
       this.advance();
       const elements = [];
+
+      this.skipNewlines();
+
       while (!this.check(TT.RBRACKET) && !this.isEOF()) {
-        if (this.check(TT.SPREAD)) { this.advance(); elements.push(n('Spread', { expr: this.parseExpr() })); }
-        else elements.push(this.parseExpr());
-        this.match(TT.COMMA);
+        if (this.check(TT.SPREAD)) {
+          this.advance();
+          elements.push(n('Spread', { expr: this.parseExpr() }));
+        } else {
+          elements.push(this.parseExpr());
+        }
+
+        this.skipNewlines();
+
+        if (!this.match(TT.COMMA)) break;
+
+        this.skipNewlines();
       }
+
       this.expect(TT.RBRACKET);
       return n('ArrayLiteral', { elements });
     }
@@ -475,35 +499,28 @@ export class Parser {
   parseArgList() {
     this.expect(TT.LPAREN);
     const args = [];
-  
+
     this.skipNewlines();
-  
+
     while (!this.check(TT.RPAREN) && !this.isEOF()) {
       if (this.check(TT.SPREAD)) {
         this.advance();
         args.push(n('Spread', { expr: this.parseExpr() }));
-      } else if (this.check(TT.KEYWORD, 'destroy')) {
-        this.advance();
-        this.expect(TT.LPAREN);
-        this.skipNewlines();
-        const expr = this.parseExpr();
-        this.skipNewlines();
-        this.expect(TT.RPAREN);
-        args.push(n('Destroy', { expr }));
       } else {
         args.push(this.parseExpr());
       }
-  
+
       this.skipNewlines();
-  
+
       if (!this.match(TT.COMMA)) break;
+
       this.skipNewlines();
     }
-  
-    this.skipNewlines();
+
     this.expect(TT.RPAREN);
     return args;
   }
+}
 
 // ─── Binding powers (Pratt) ───────────────────────────────────────────────────
 function infixBP(token) {
