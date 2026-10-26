@@ -1,0 +1,99 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Cajyu",
+  "scopeName": "source.cajyu",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#builtins" },
+    { "include": "#types" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#functions" },
+    { "include": "#class-names" },
+    { "include": "#self" },
+    { "include": "#constants" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.cajyu",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.cajyu",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.cajyu",
+          "begin": "\"", "end": "\"",
+          "patterns": [{ "name": "constant.character.escape.cajyu", "match": "\\\\." }]
+        },
+        {
+          "name": "string.quoted.single.cajyu",
+          "begin": "'", "end": "'",
+          "patterns": [{ "name": "constant.character.escape.cajyu", "match": "\\\\." }]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.cajyu",
+          "match": "\\b(if|elif|else|for|while|in|return|try|catch)\\b"
+        },
+        {
+          "name": "keyword.declaration.cajyu",
+          "match": "\\b(var|const|fn|sync|class|import|export|from|as|private)\\b"
+        },
+        {
+          "name": "keyword.operator.cajyu",
+          "match": "\\b(and|or|not|new|wait|destroy)\\b"
+        },
+        {
+          "name": "keyword.other.cajyu",
+          "match": "\\b(Main)\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "name": "support.function.builtin.cajyu",
+      "match": "\\b(print|Bfs|Bexec)\\b"
+    },
+    "types": {
+      "name": "entity.name.type.cajyu",
+      "match": "(?<=:)\\s*\\b(String|Number|Int|Float|Boolean|Array|Object)\\b"
+    },
+    "numbers": {
+      "name": "constant.numeric.cajyu",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
+    },
+    "operators": {
+      "name": "keyword.operator.cajyu",
+      "match": "(==|!=|<=|>=|<|>|\\+\\+|--|\\+=|-=|=|\\+|-|\\*|/|%|!)"
+    },
+    "functions": {
+      "name": "entity.name.function.cajyu",
+      "match": "\\b([a-z_][a-zA-Z0-9_]*)(?=\\s*\\()"
+    },
+    "class-names": {
+      "name": "entity.name.class.cajyu",
+      "match": "\\b([A-Z][a-zA-Z0-9_]*)\\b"
+    },
+    "self": {
+      "name": "variable.language.cajyu",
+      "match": "\\bSelf\\b"
+    },
+    "constants": {
+      "name": "constant.language.cajyu",
+      "match": "\\b(true|false|null)\\b"
+    }
+  }
+}

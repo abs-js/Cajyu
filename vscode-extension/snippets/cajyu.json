@@ -1,0 +1,31 @@
+{
+  "Function": {
+    "prefix": "fn",
+    "body": ["fn ${1:name} ${2:params} {", "  ${0}", "}"],
+    "description": "Cajyu function"
+  },
+  "Async Function": {
+    "prefix": "sfn",
+    "body": ["sync fn ${1:name} ${2:params} {", "  ${0}", "}"],
+    "description": "Async Cajyu function"
+  },
+  "Variable": { "prefix": "var",   "body": ["var ${1:name} = ${0}"],   "description": "Variable declaration" },
+  "Const":    { "prefix": "const", "body": ["const ${1:name} = ${0}"], "description": "Immutable variable" },
+  "If":       { "prefix": "if",    "body": ["if ${1:condition} {", "  ${0}", "}"], "description": "If statement" },
+  "If Else":  { "prefix": "ife",   "body": ["if ${1:condition} {", "  ${2}", "} else {", "  ${0}", "}"], "description": "If/else" },
+  "For In":   { "prefix": "for",   "body": ["for ${1:item} in ${2:list} {", "  ${0}", "}"], "description": "For-in loop" },
+  "While":    { "prefix": "while", "body": ["while ${1:condition} {", "  ${0}", "}"], "description": "While loop" },
+  "Class": {
+    "prefix": "class",
+    "body": ["class ${1:Name} {", "  Main ${2:params} {", "    ${0}", "  }", "}"],
+    "description": "Class declaration"
+  },
+  "Import":         { "prefix": "imp",  "body": ["import ${1:Name} from CajyuLibs.${2:lib}"], "description": "Import from CajyuLibs" },
+  "Import Builtin": { "prefix": "impb", "body": ["import ${1:Bfs} from ${1:Bfs}"], "description": "Import builtin" },
+  "Try Catch": {
+    "prefix": "try",
+    "body": ["const ${1:result} = try ${2:expr}", "catch ${1:result} as ${3:err} {", "  ${0}", "}"],
+    "description": "Try/catch block"
+  },
+  "Print": { "prefix": "print", "body": ["print(${0})"], "description": "Print to console" }
+}

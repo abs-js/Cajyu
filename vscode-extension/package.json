@@ -1,0 +1,32 @@
+{
+  "name": "cajyu-language",
+  "displayName": "Cajyu",
+  "description": "Cajyu language support: syntax highlighting, snippets and file icons",
+  "version": "1.0.0",
+  "publisher": "abs-js",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Programming Languages", "Snippets"],
+  "icon": "icons/logo-128.png",
+  "contributes": {
+    "languages": [{
+      "id": "cajyu",
+      "aliases": ["Cajyu", "cajyu"],
+      "extensions": [".cjy"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "cajyu",
+      "scopeName": "source.cajyu",
+      "path": "./syntaxes/cajyu.tmLanguage.json"
+    }],
+    "snippets": [{
+      "language": "cajyu",
+      "path": "./snippets/cajyu.json"
+    }],
+    "iconThemes": [{
+      "id": "cajyu-icons",
+      "label": "Cajyu Icons",
+      "path": "./icons/theme.json"
+    }]
+  }
+}

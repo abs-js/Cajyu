@@ -10,15 +10,17 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 
 [![npm](https://img.shields.io/badge/npm-cajyu-blue)](https://www.npmjs.com/package/cajyu)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.2-brightgreen)](package.json)
+[![Version](https://img.shields.io/badge/version-1.4.0-brightgreen)](package.json)
 
 ---
 
 ## Features
 
-- Big ecosystem
-- Clean syntax
-- Less code to do same thing
+- Big ecosystem — official libraries for HTTP, WebSocket, SQL, auth, cache and more
+- Clean syntax — less code to do the same thing
+- Real parser — Lexer → AST → Codegen pipeline (no more regex-based transpilation)
+- Better error messages — formatted, pointed, with hints
+- VS Code extension with syntax highlighting and snippets
 
 ---
 
@@ -27,19 +29,20 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 ```bash
 npm install -g cajyu
 cajyu init
-
 cajyu run index.cjy
 ```
 
+## VS Code Extension
+
+Install from the `vscode-extension/` folder:
+
 ```bash
-# Or using npx
-npx cajyu -v
+cd vscode-extension
+npx vsce package   # generates cajyu-language-1.0.0.vsix
+code --install-extension cajyu-language-1.0.0.vsix
 ```
 
-NOTE: maybe index.cjy has an bug, so fix it if:
-1. Install serial with ´npx cajyu inst serial´.
-2. import it with ´import print from CajyuLibs.serial´ in top of file.
-
+Features: syntax highlighting, snippets (`fn`, `class`, `try`, `imp`…), `.cjy` file icon.
 
 ---
 
@@ -68,29 +71,6 @@ cajyu <command> [options]
 
 ---
 
-## Project file: `cajyu.json`
-
-`cajyu init` generates a `cajyu.json` (instead of `package.json`) that Cajyu projects use:
-
-```json
-{
-  "name": "my-project",
-  "version": "1.0.0",
-  "description": "",
-  "mainScript": "index.cjy",
-  "links": {},
-  "dependences": {},
-  "scripts": {
-    "start": "cajyu run index.cjy"
-  },
-  "type": "module"
-}
-```
-
-Run the project entry point with `cajyu start`.
-
----
-
 ## Syntax
 
 See roadline: https://github.com/abs-js/Cajyu-Roadline/
@@ -98,20 +78,31 @@ Official libraries: https://github.com/abs-js/CajyuLibs/
 
 ---
 
+## Built-in libraries (no install needed)
+
+| Name    | Description                       |
+|---------|-----------------------------------|
+| `Bfs`   | Read, write, append, exists, remove files |
+| `Bexec` | Shell command execution           |
+
+---
+
 ## Contributing
 
 Pull requests are welcome. Priority areas:
 
-- A proper parser (current one is regex-based)
 - More language features
 - Additional libraries
+- Playground / online editor
 
-### Next features
+### Roadmap
 
-- [ ] Bigger ecosystem
-- [x] Better parser
-- [ ] VS code extension
-- [ ] Better error catching
+- [x] Better parser (Lexer → AST → Codegen)
+- [x] VS Code extension
+- [x] Better error catching
+- [x] Bigger ecosystem
+- [ ] Online playground
+- [ ] Language server (LSP)
 
 ---
 

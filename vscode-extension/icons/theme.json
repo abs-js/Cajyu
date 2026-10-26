@@ -1,0 +1,11 @@
+{
+  "iconDefinitions": {
+    "_cajyu_file": {
+      "iconPath": "./logo-64.png"
+    }
+  },
+  "fileExtensions": {
+    "cjy": "_cajyu_file"
+  },
+  "file": "_cajyu_file"
+}

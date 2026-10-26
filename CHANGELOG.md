@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.4.0 — Major release
+- **Parser rewrite**: substituição completa do transpilador regex-based por pipeline Lexer → AST → Codegen
+  - `src/lexer.js`: tokenizador completo com suporte a strings, template strings, comentários de bloco, todos os operadores
+  - `src/parser.js`: Pratt parser com suporte a todas as construções da linguagem (fn, class, if/elif/else, for/while, try/catch, import/export, destroy, as, private, new, await)
+  - `src/codegen.js`: emissor de JS a partir da AST; inferência automática de `async` via `containsAwait`
+- **VS Code extension** em `vscode-extension/`:
+  - Syntax highlighting via TextMate grammar (keywords, strings, números, operadores, classes, Self, builtins)
+  - Snippets: `fn`, `sfn`, `var`, `const`, `if`, `ife`, `for`, `while`, `class`, `imp`, `impb`, `try`, `print`
+  - File icon `.cjy`
+  - Auto-closing de `{}`, `[]`, `()`, `""`, `''`
+- **Better error catching**: erros de Lexer, Parse e Codegen mostrados com caixa formatada, linha/coluna e hint; runtime errors mostram stack relevante
+- Mensagem de erro de lib não encontrada agora inclui dica de instalação
+- README atualizado com todas as tasks marcadas como concluídas
+
+
 ## 1.3.2
 - **FIX** Funções anônimas com `wait` agora são automaticamente marcadas como `async` — resolve "Unexpected reserved word" em handlers do Orgapp e qualquer `fn` inline que use `wait`
 - Novo passo `inferAsync` no pipeline de transpile: percorre todos os blocos `function(...) {}` gerados e adiciona `async` quando o corpo contém `await`
