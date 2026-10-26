@@ -10,7 +10,7 @@ Cajyu gives you a simpler, more expressive syntax while staying fully compatible
 
 [![npm](https://img.shields.io/badge/npm-cajyu-blue)](https://www.npmjs.com/package/cajyu)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.0-brightgreen)](package.json)
+[![Version](https://img.shields.io/badge/version-1.3.2-brightgreen)](package.json)
 
 ---
 
