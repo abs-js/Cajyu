@@ -119,6 +119,8 @@ function transpile(source, baseDir) {
   // FIX: funções com suporte a `as` nos parâmetros
   code = transpileFunctions(code);
   code = transpileControlFlow(code);
+  // FIX: inferir async em funções anônimas que usam await
+  code = inferAsync(code);
 
   // ── Build import block ───────────────────────────────────────────────────
   let importCode = '';
@@ -337,6 +339,56 @@ function parseParams(rawParams) {
     jsParams:   jsParamList.join(', '),
     aliasLines: aliasList.join(' '),
   };
+}
+
+// ─── async inference: function(...) { com await → async function(...) { ────────
+// Percorre o código e para cada `function(` verifica se o bloco correspondente
+// contém `await` — se sim, adiciona `async` na frente.
+function inferAsync(code) {
+  // Estratégia: encontra todas as ocorrências de `function(` ou `function nome(`
+  // que NÃO sejam precedidas de `async`, e verifica se o bloco tem `await`.
+  const result = [];
+  let i = 0;
+
+  while (i < code.length) {
+    // Procura `function` não precedido de `async `
+    const idx = code.indexOf('function', i);
+    if (idx === -1) { result.push(code.slice(i)); break; }
+
+    // Verifica se já tem `async` antes
+    const before = code.slice(Math.max(0, idx - 6), idx);
+    if (before.endsWith('async ')) {
+      result.push(code.slice(i, idx + 8));
+      i = idx + 8;
+      continue;
+    }
+
+    // Avança até o `{` de abertura do bloco desta função
+    let braceStart = code.indexOf('{', idx);
+    if (braceStart === -1) { result.push(code.slice(i)); break; }
+
+    // Encontra o bloco inteiro (balanceia chaves)
+    let depth = 0;
+    let braceEnd = braceStart;
+    for (let j = braceStart; j < code.length; j++) {
+      if (code[j] === '{') depth++;
+      else if (code[j] === '}') { depth--; if (depth === 0) { braceEnd = j; break; } }
+    }
+
+    const body = code.slice(braceStart, braceEnd + 1);
+
+    // Se o corpo contém `await `, esta função precisa de `async`
+    if (/await\s/.test(body)) {
+      result.push(code.slice(i, idx));
+      result.push('async function');
+      i = idx + 8; // pula 'function'
+    } else {
+      result.push(code.slice(i, idx + 8));
+      i = idx + 8;
+    }
+  }
+
+  return result.join('');
 }
 
 // ─── Control flow ─────────────────────────────────────────────────────────────

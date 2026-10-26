@@ -1,0 +1,21 @@
+import print from CajyuLibs.serial;
+import input from CajyuLibs.ReadLine;
+import Server from CajyuLibs.http;
+import WS from CajyuLibs.websocket;
+
+// Saudação
+var nome = wait input("Seu nome: ");
+print("Olá, " + nome + "!");
+
+// Servidor HTTP
+var server = new Server(3000);
+print("HTTP em http://localhost:3000");
+server.file("/", "<h1>Olá, " + nome + "!</h1>");
+
+// WebSocket
+var wss = new WS.Server(8080);
+print("WebSocket na porta 8080");
+wss.on("message", fn msg {
+  print(nome + " disse: " + msg);
+  wss.broadcast(nome + ": " + msg);
+});

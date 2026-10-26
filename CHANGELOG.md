@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2
+- **FIX** Funções anônimas com `wait` agora são automaticamente marcadas como `async` — resolve "Unexpected reserved word" em handlers do Orgapp e qualquer `fn` inline que use `wait`
+- Novo passo `inferAsync` no pipeline de transpile: percorre todos os blocos `function(...) {}` gerados e adiciona `async` quando o corpo contém `await`
+
 ## 1.3.1 — Bugfix release
 - **FIX #1** `export`: suporte restaurado — variáveis exportadas declaradas fora do async IIFE, `export { X }` emitido no nível do módulo ES
 - **FIX #2** `as` em parâmetros de função restaurado: `fn foo a as x, b as y { }` funciona novamente; `parseParams` atualizado
