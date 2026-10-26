@@ -1,3 +1,0 @@
-import print from CajyuLibs.serial;
-
-print("Olá, mundo!");
