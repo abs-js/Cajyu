@@ -1,15 +1,22 @@
-# Cajyu Examples
+# Examples
 
-| File | Description |
-|------|-------------|
-| `basic.cjy` | Hello world, variables, conditionals |
-| `builtin.cjy` | Built-in functions (`len`, `range`) |
-| `functions-classes.cjy` | Functions and classes |
-| `libraries.cjy` | Using libraries (ReadLine) |
+Only one project: **Orgapp Auth**
 
-Run with:
+File: `orgapp-auth.cjy`
+
+A small app with registration, login, profile, posts and token authentication using Orgapp + Auth + Cache.
+
+### Install
+
 ```bash
-cajyu run examples/basic.cjy
+cajyu inst Orgapp
+cajyu inst auth
+cajyu inst cache
+cajyu inst serial
 ```
 
-For a full learning path, see: https://github.com/abs-js/Cajyu-Roadline
+### Run
+
+```bash
+cajyu run examples/orgapp-auth.cjy
+```
